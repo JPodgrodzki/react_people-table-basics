@@ -68,6 +68,7 @@ const PersonLink = ({ personName, people }) => {
 
 const PeoplePage = () => {
   const [people, setPeople] = useState([]);
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { slug } = useParams();
 
@@ -83,6 +84,8 @@ const PeoplePage = () => {
         const data = await response.json();
 
         setPeople(data);
+      } catch {
+        setError('Something went wrong');
       } finally {
         setTimeout(() => {
           setIsLoading(false);
@@ -102,66 +105,75 @@ const PeoplePage = () => {
             <Loader />
           ) : (
             <>
-              <p data-cy="peopleLoadingError" className="has-text-danger">
-                Something went wrong
-              </p>
-              <p data-cy="noPeopleMessage">There are no people on the server</p>
-              <table
-                data-cy="peopleTable"
-                className="table is-striped is-hoverable is-narrow is-fullwidth"
-              >
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Sex</th>
-                    <th>Born</th>
-                    <th>Died</th>
-                    <th>Mother</th>
-                    <th>Father</th>
-                  </tr>
-                </thead>
+              {error && (
+                <p data-cy="peopleLoadingError" className="has-text-danger">
+                  {error}
+                </p>
+              )}
+              {!error && people.length === 0 && (
+                <p data-cy="noPeopleMessage">
+                  There are no people on the server
+                </p>
+              )}
+              {!error && people.length > 0 && (
+                <table
+                  data-cy="peopleTable"
+                  // eslint-disable-next-line max-len
+                  className="table is-striped is-hoverable is-narrow is-fullwidth"
+                >
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Sex</th>
+                      <th>Born</th>
+                      <th>Died</th>
+                      <th>Mother</th>
+                      <th>Father</th>
+                    </tr>
+                  </thead>
 
-                <tbody>
-                  {people.map(person => {
-                    return (
-                      <tr
-                        data-cy="person"
-                        key={person.slug}
-                        className={
-                          person.slug === slug ? 'has-background-warning' : ''
-                        }
-                      >
-                        <td>
-                          <Link
-                            to={`/people/${person.slug}`}
-                            className={
-                              person.sex === 'f' ? 'has-text-danger' : ''
-                            }
-                          >
-                            {person.name}
-                          </Link>
-                        </td>
+                  <tbody>
+                    {people.map(person => {
+                      return (
+                        <tr
+                          data-cy="person"
+                          key={person.slug}
+                          className={
+                            person.slug === slug ? 'has-background-warning' : ''
+                          }
+                        >
+                          <td>
+                            <Link
+                              to={`/people/${person.slug}`}
+                              className={
+                                person.sex === 'f' ? 'has-text-danger' : ''
+                              }
+                            >
+                              {person.name}
+                            </Link>
+                          </td>
 
-                        <td>{person.sex}</td>
-                        <td>{person.born}</td>
-                        <td>{person.died}</td>
-                        <td>
-                          <PersonLink
-                            personName={person.motherName}
-                            people={people}
-                          />
-                        </td>
-                        <td>
-                          <PersonLink
-                            personName={person.fatherName}
-                            people={people}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          <td>{person.sex}</td>
+                          <td>{person.born}</td>
+                          <td>{person.died}</td>
+                          <td>
+                            <PersonLink
+                              personName={person.motherName}
+                              people={people}
+                            />
+                          </td>
+                          <td>
+                            <PersonLink
+                              personName={person.fatherName}
+                              people={people}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </>
           )}
         </div>
